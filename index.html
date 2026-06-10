@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Dental - Sistema CRUD Local</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; font-family: sans-serif; background-color: #f7f9fc; }
+        header { background-color: #2196F3 !important; color: white; display: flex; align-items: center; justify-content: center; gap: 30px; }
+        .logo-img { width: 130px; height: 130px; object-fit: contain; }
+        .titulo-grande { font-size: 42px !important; margin: 0; font-weight: bold; letter-spacing: 2px; }
+        .subtitulo-grande { margin: 5px 0 0 0; font-size: 18px; opacity: 0.9; }
+        main { flex: 1; padding: 20px; }
+        footer { background-color: #3f51b5 !important; color: white; padding: 12px 0; }
+        .oculto { display: none !important; }
+        
+        .hero-inicio { background: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .frase-bienvenida { font-size: 24px; color: #1a237e; font-weight: bold; line-height: 1.4; max-width: 800px; margin: 0 auto; }
+        
+        .card-formulario { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card-formulario h3 { margin-top: 0; font-weight: bold; border-bottom: 2px solid #2196F3; padding-bottom: 8px; }
+        label { font-weight: bold; font-size: 13px; color: #555; }
+        input, select { margin-bottom: 12px; border-radius: 4px; }
+        
+        .contenedor-datos { background: #eef2f7; padding: 15px; border-radius: 12px; max-height: 650px; overflow-y: auto; border: 1px dashed #bbb; }
+        .tarjeta-registro { background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        
+        .btn-accion { padding: 4px 8px; font-size: 12px; margin-left: 5px; cursor: pointer; border-radius: 4px; border: none; color: white; }
+        .btn-editar { background-color: #ff9800; }
+        .btn-borrar { background-color: #f44336; }
+        .acciones-tarjeta { margin-top: 10px; text-align: right; }
+
+        .kpi-card { padding: 15px; border-radius: 8px; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .buscador-caja { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <header class="w3-container w3-padding-32 w3-card-4">
+        <img src="consultorio.png" alt="Logo Lumina Dental" class="logo-img">
+        <div class="w3-left-align">
+            <h1 class="titulo-grande">LUMINA DENTAL</h1>
+            <p class="subtitulo-grande">Panel de Control & Sistema Local | CBTIS 128</p>
+        </div>
+    </header>
+
+    <nav class="w3-bar w3-black w3-card">
+        <button class="w3-bar-item w3-button w3-mobile tab-btn w3-blue" onclick="abrirModulo(event, 'inicio')">🎛️ Inicio</button>
+        <button class="w3-bar-item w3-button w3-mobile tab-btn" onclick="abrirModulo(event, 'pacientes')">📋 Pacientes</button>
+        <button class="w3-bar-item w3-button w3-mobile tab-btn" onclick="abrirModulo(event, 'odontologos')">🥼 Odontólogos</button>
+        <button class="w3-bar-item w3-button w3-mobile tab-btn" onclick="abrirModulo(event, 'consultorios')">🏢 Consultorios</button>
+        <button class="w3-bar-item w3-button w3-mobile tab-btn" onclick="abrirModulo(event, 'citas')">📅 Citas</button>
+    </nav>
+
+    <main class="w3-container">
+        <div class="w3-content" style="max-width:1200px">
+
+            <div id="alerta-exito" class="w3-panel w3-green w3-round w3-animate-top oculto" style="padding:10px; margin-bottom:15px;">
+                <p style="margin:0;"><i class="fa fa-check-circle"></i> <span id="texto-alerta">¡Éxito! Operación realizada correctamente.</span></p>
+            </div>
+
+            <div id="inicio" class="seccion-modulo w3-animate-opacity">
+                <div class="hero-inicio w3-margin-bottom">
+                    <p class="frase-bienvenida">"Aqui te ayudamos a resanar y a cuidar tus dientes y somos los mejores haciendolo"</p>
+                </div>
+
+                <div class="w3-row-padding w3-margin-bottom" style="margin:0 -16px;">
+                    <div class="w3-quarter w3-margin-bottom"><div class="kpi-card w3-blue"><div class="w3-left"><i class="fa fa-user w3-xxlarge"></i></div><div class="w3-right"><h3 id="kpi-pacientes" style="margin:0; font-weight:bold;">0</h3></div><div class="w3-clear"></div><h4>Pacientes</h4></div></div>
+                    <div class="w3-quarter w3-margin-bottom"><div class="kpi-card w3-teal"><div class="w3-left"><i class="fa fa-user-md w3-xxlarge"></i></div><div class="w3-right"><h3 id="kpi-odontologos" style="margin:0; font-weight:bold;">0</h3></div><div class="w3-clear"></div><h4>Médicos</h4></div></div>
+                    <div class="w3-quarter w3-margin-bottom"><div class="kpi-card w3-orange w3-text-white"><div class="w3-left"><i class="fa fa-building w3-xxlarge"></i></div><div class="w3-right"><h3 id="kpi-consultorios" style="margin:0; font-weight:bold;">0</h3></div><div class="w3-clear"></div><h4>Consultorios</h4></div></div>
+                    <div class="w3-quarter w3-margin-bottom"><div class="kpi-card w3-purple"><div class="w3-left"><i class="fa fa-calendar w3-xxlarge"></i></div><div class="w3-right"><h3 id="kpi-citas" style="margin:0; font-weight:bold;">0</h3></div><div class="w3-clear"></div><h4>Citas Agendadas</h4></div></div>
+                </div>
+            </div>
+
+            <div id="pacientes" class="seccion-modulo w3-animate-opacity oculto">
+                <div class="w3-row-padding" style="margin:0 -16px;">
+                    <div class="w3-half w3-margin-bottom">
+                        <div class="card-formulario">
+                            <h3 id="titulo-form-pacientes" class="w3-text-blue"><i class="fa fa-user"></i> Registrar Paciente</h3>
+                            <form id="form-pacientes" onsubmit="guardarRegistro(event, 'pacientes')">
+                                <input type="hidden" name="index_edicion" id="edit-index-pacientes" value="">
+                                <label>ID Paciente:</label><input class="w3-input w3-border" type="text" name="id_paciente" id="input-id-pacientes" required placeholder="Ej: 001">
+                                <label>Nombre Completo:</label><input class="w3-input w3-border" type="text" name="nombre" required>
+                                <div class="w3-row-padding" style="padding:0"><div class="w3-half"><label>Edad:</label><input class="w3-input w3-border" type="number" name="edad" required></div><div class="w3-half"><label>F. Nacimiento:</label><input class="w3-input w3-border" type="text" name="nacimiento" required placeholder="dd/mm/aaaa"></div></div>
+                                <label>Tipo de Sangre:</label><input class="w3-input w3-border" type="text" name="tipo_sangre" required placeholder="Ej: O+">
+                                <label>Teléfono:</label><input class="w3-input w3-border" type="text" name="telefono" required>
+                                <div class="w3-row-padding" style="padding:0">
+                                    <div class="w3-half">
+                                        <label>Sexo:</label>
+                                        <select class="w3-select w3-border" name="sexo">
+                                            <option value="M">M</option>
+                                            <option value="F">F</option>
+                                        </select>
+                                    </div>
+                                    <div class="w3-half"><label>N° Seguro:</label><input class="w3-input w3-border" type="text" name="num_seguro" required></div>
+                                </div>
+                                <button id="btn-submit-pacientes" class="w3-button w3-blue w3-block w3-margin-top w3-round" type="submit">Agregar Paciente</button>
+                                <button type="button" id="btn-cancelar-pacientes" class="w3-button w3-grey w3-block w3-margin-top w3-round oculto" onclick="cancelarEdicion('pacientes')">Cancelar Edición</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="w3-half">
+                        <h3 class="w3-text-dark-grey" style="margin-top:0;"><b><i class="fa fa-database"></i> Pacientes Registrados</b></h3>
+                        <div class="buscador-caja">
+                            <input class="w3-input w3-border w3-round" type="text" id="buscar-pacientes" placeholder="🔍 Buscar por nombre o ID..." oninput="actualizarVistaDerecha('pacientes')">
+                        </div>
+                        <div id="lista-pacientes" class="contenedor-datos"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="odontologos" class="seccion-modulo w3-animate-opacity oculto">
+                <div class="w3-row-padding" style="margin:0 -16px;">
+                    <div class="w3-half w3-margin-bottom">
+                        <div class="card-formulario">
+                            <h3 id="titulo-form-odontologos" class="w3-text-teal"><i class="fa fa-user-md"></i> Registrar Odontólogo</h3>
+                            <form id="form-odontologos" onsubmit="guardarRegistro(event, 'odontologos')">
+                                <input type="hidden" name="index_edicion" id="edit-index-odontologos" value="">
+                                <label>ID Médico:</label><input class="w3-input w3-border" type="text" name="id_doctor" id="input-id-odontologos" required placeholder="Ej: D01">
+                                <label>Nombre del Médico:</label><input class="w3-input w3-border" type="text" name="nombre" required>
+                                <label>Especialidad:</label><input class="w3-input w3-border" type="text" name="especialidad" required>
+                                <label>Contacto Web:</label><input class="w3-input w3-border" type="text" name="contacto" required>
+                                <label>RFC:</label><input class="w3-input w3-border" type="text" name="rfc" required>
+                                <label>Licencia / Dirección:</label><input class="w3-input w3-border" type="text" name="licencia" required>
+                                <button id="btn-submit-odontologos" class="w3-button w3-teal w3-block w3-margin-top w3-round" type="submit">Agregar Odontólogo</button>
+                                <button type="button" id="btn-cancelar-odontologos" class="w3-button w3-grey w3-block w3-margin-top w3-round oculto" onclick="cancelarEdicion('odontologos')">Cancelar Edición</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="w3-half">
+                        <h3 class="w3-text-dark-grey" style="margin-top:0;"><b><i class="fa fa-database"></i> Médicos Registrados</b></h3>
+                        <div class="buscador-caja">
+                            <input class="w3-input w3-border w3-round" type="text" id="buscar-odontologos" placeholder="🔍 Buscar por nombre o especialidad..." oninput="actualizarVistaDerecha('odontologos')">
+                        </div>
+                        <div id="lista-odontologos" class="contenedor-datos"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="consultorios" class="seccion-modulo w3-animate-opacity oculto">
+                <div class="w3-row-padding" style="margin:0 -16px;">
+                    <div class="w3-half w3-margin-bottom">
+                        <div class="card-formulario">
+                            <h3 id="titulo-form-consultorios" class="w3-text-orange w3-text-white"><i class="fa fa-building"></i> Asignar Consultorio</h3>
+                            <form id="form-consultorios" onsubmit="guardarRegistro(event, 'consultorios')">
+                                <input type="hidden" name="index_edicion" id="edit-index-consultorios" value="">
+                                <label>ID Doc:</label><input class="w3-input w3-border" type="text" name="id_doc" id="input-id-consultorios" required>
+                                <label>Nombre del Médico:</label><input class="w3-input w3-border" type="text" name="nombre_medico" required>
+                                <label>Especialidad:</label><input class="w3-input w3-border" type="text" name="especialidad" required>
+                                <label>N° Consultorio:</label><input class="w3-input w3-border" type="text" name="num_consultorio" required>
+                                <label>Piso:</label><input class="w3-input w3-border" type="text" name="piso" required>
+                                <button id="btn-submit-consultorios" class="w3-button w3-orange w3-text-white w3-block w3-margin-top w3-round" type="submit">Agregar Asignación</button>
+                                <button type="button" id="btn-cancelar-consultorios" class="w3-button w3-grey w3-block w3-margin-top w3-round oculto" onclick="cancelarEdicion('consultorios')">Cancelar Edición</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="w3-half">
+                        <h3 class="w3-text-dark-grey" style="margin-top:0;"><b><i class="fa fa-database"></i> Consultorios Asignados</b></h3>
+                        <div class="buscador-caja">
+                            <input class="w3-input w3-border w3-round" type="text" id="buscar-consultorios" placeholder="🔍 Buscar por médico o consultorio..." oninput="actualizarVistaDerecha('consultorios')">
+                        </div>
+                        <div id="lista-consultorios" class="contenedor-datos"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="citas" class="seccion-modulo w3-animate-opacity oculto">
+                <div class="w3-row-padding" style="margin:0 -16px;">
+                    <div class="w3-half w3-margin-bottom">
+                        <div class="card-formulario">
+                            <h3 id="titulo-form-citas" class="w3-text-purple"><i class="fa fa-calendar"></i> Agendar Cita</h3>
+                            <form id="form-citas" onsubmit="guardarRegistro(event, 'citas')">
+                                <input type="hidden" name="index_edicion" id="edit-index-citas" value="">
+                                <label>ID Paciente:</label><input class="w3-input w3-border" type="text" name="id_paciente" id="input-id-citas" required>
+                                <div class="w3-row-padding" style="padding:0"><div class="w3-half"><label>Fecha:</label><input class="w3-input w3-border" type="text" name="fecha" required placeholder="dd/mm/aaaa"></div><div class="w3-half"><label>Hora:</label><input class="w3-input w3-border" type="text" name="hora" required placeholder="10:00 am"></div></div>
+                                <label>Médico Tratante:</label><input class="w3-input w3-border" type="text" name="medico" required>
+                                <div class="w3-row-padding" style="padding:0">
+                                    <div class="w3-half"><label>Tratamiento:</label>
+                                        <select class="w3-select w3-border" name="tratamiento">
+                                            <option value="Limpieza Dental ($400)">Limpieza Dental ($400)</option>
+                                            <option value="Resina Estética ($650)">Resina Estética ($650)</option>
+                                            <option value="Extracción ($500)">Extracción ($500)</option>
+                                            <option value="Ortodoncia - Control ($800)">Ortodoncia - Control ($800)</option>
+                                        </select>
+                                    </div>
+                                    <div class="w3-half"><label>Ubicación:</label><input class="w3-input w3-border" type="text" name="consultorio" placeholder="Consultorio 2" required></div>
+                                </div>
+                                <button id="btn-submit-citas" class="w3-button w3-purple w3-block w3-margin-top w3-round" type="submit">Agregar Cita</button>
+                                <button type="button" id="btn-cancelar-citas" class="w3-button w3-grey w3-block w3-margin-top w3-round oculto" onclick="cancelarEdicion('citas')">Cancelar Edición</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="w3-half">
+                        <h3 class="w3-text-dark-grey" style="margin-top:0;"><b><i class="fa fa-database"></i> Agenda de Citas</b></h3>
+                        <div class="buscador-caja">
+                            <input class="w3-input w3-border w3-round" type="text" id="buscar-citas" placeholder="🔍 Buscar por ID o Médico..." oninput="actualizarVistaDerecha('citas')">
+                        </div>
+                        <div id="lista-citas" class="contenedor-datos"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="w3-container w3-center w3-small">
+        <p style="margin: 4px 0;"><b>Alumno:</b> Hernández Cuellar Emiliano | Especialidad: Programación</p>
+        <p style="margin: 4px 0;">4to Semestre | Grupo: J | CBTIS 128</p>
+    </footer>
+
+    <script>
+        // Carga inicial de datos de tus tarjetas para que no abra vacío el programa
+        if (!localStorage.getItem('db_pacientes')) {
+            localStorage.setItem('db_pacientes', JSON.stringify([
+                {id_paciente: "001", nombre: "Raul Lopez Perez", edad: 26, nacimiento: "09/02/2000", tipo_sangre: "AO+", telefono: "656-137-5134", sexo: "M", num_seguro: "0701"},
+                {id_paciente: "002", nombre: "Alejandra Villa Ramirez", edad: 23, nacimiento: "08/05/2002", tipo_sangre: "A-", telefono: "656-138-7607", sexo: "F", num_seguro: "2021"}
+            ]));
+        }
+        if (!localStorage.getItem('db_odontologos')) {
+            localStorage.setItem('db_odontologos', JSON.stringify([
+                {id_doctor: "D01", nombre: "Luis Hernandez", especialidad: "Odontologia general.", contacto: "www@Odon.com", rfc: "HERL800515H31", licencia: "4582930"}
+            ]));
+        }
+        if (!localStorage.getItem('db_consultorios')) {
+            localStorage.setItem('db_consultorios', JSON.stringify([
+                {id_doc: "D01", nombre_medico: "Luis Hernandez", especialidad: "Odontologia General", num_consultorio: "1", piso: "2"}
+            ]));
+        }
+        if (!localStorage.getItem('db_citas')) {
+            localStorage.setItem('db_citas', JSON.stringify([
+                {id_paciente: "001", fecha: "17/02/2026", hora: "9:30am", medico: "Luis Hernandez", tratamiento: "Limpieza Dental ($400)", consultorio: "1"}
+            ]));
+        }
+
+        // Inicializar los contadores globales
+        actualizarKPIs();
+
+        // Control de navegación entre módulos
+        function abrirModulo(evt, nombreModulo) {
+            var i, x, tablinks;
+            x = document.getElementsByClassName("seccion-modulo");
+            for (i = 0; i < x.length; i++) { x[i].classList.add("oculto"); }
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("w3-blue"); }
+            document.getElementById(nombreModulo).classList.remove("oculto");
+            if(evt) evt.currentTarget.classList.add("w3-blue");
+            
+            if(nombreModulo !== 'inicio') {
+                cancelarEdicion(nombreModulo);
+                actualizarVistaDerecha(nombreModulo);
+            }
+            actualizarKPIs();
+        }
+
+        function lanzarAlerta(mensaje) {
+            document.getElementById('texto-alerta').innerText = mensaje;
+            const alerta = document.getElementById('alerta-exito');
+            alerta.classList.remove('oculto');
+            setTimeout(() => { alerta.classList.add('oculto'); }, 2500);
+        }
+
+        function actualizarKPIs() {
+            document.getElementById('kpi-pacientes').innerText = (JSON.parse(localStorage.getItem('db_pacientes')) || []).length;
+            document.getElementById('kpi-odontologos').innerText = (JSON.parse(localStorage.getItem('db_odontologos')) || []).length;
+            document.getElementById('kpi-consultorios').innerText = (JSON.parse(localStorage.getItem('db_consultorios')) || []).length;
+            document.getElementById('kpi-citas').innerText = (JSON.parse(localStorage.getItem('db_citas')) || []).length;
+        }
+
+        // --- OPERACIONES CRUD ---
+
+        // 1. REGISTRAR (CREATE) & ACTUALIZAR (UPDATE)
+        function guardarRegistro(event, modulo) {
+            event.preventDefault();
+            const formulario = document.getElementById(`form-${modulo}`);
+            const datosForm = new FormData(formulario);
+            const campos = Object.fromEntries(datosForm.entries());
+            
+            let base = JSON.parse(localStorage.getItem('db_' + modulo)) || [];
+            const indexEdicion = campos.index_edicion;
+
+            delete campos.index_edicion;
+
+            if (indexEdicion === "") {
+                // Modo Guardar Nuevo
+                base.push(campos);
+                lanzarAlerta("¡Agregado correctamente al sistema local!");
+            } else {
+                // Modo Modificar Existente
+                base[parseInt(indexEdicion)] = campos;
+                lanzarAlerta("¡Registro modificado y actualizado!");
+                cancelarEdicion(modulo);
+            }
+
+            localStorage.setItem('db_' + modulo, JSON.stringify(base));
+            formulario.reset();
+            actualizarVistaDerecha(modulo);
+            actualizarKPIs();
+        }
+
+        // 2. MOSTRAR Y BUSCAR (READ)
+        function actualizarVistaDerecha(modulo) {
+            const contenedor = document.getElementById(`lista-${modulo}`);
+            const textoBusqueda = document.getElementById(`buscar-${modulo}`).value.toLowerCase();
+            contenedor.innerHTML = '';
+            
+            let datos = JSON.parse(localStorage.getItem('db_' + modulo)) || [];
+            
+            // Lógica de filtrado dinámico (Buscar)
+            let datosFiltrados = datos.map((item, index) => ({item, originalIndex: index})).filter(objeto => {
+                if (modulo === 'pacientes') {
+                    return objeto.item.nombre.toLowerCase().includes(textoBusqueda) || objeto.item.id_paciente.includes(textoBusqueda);
+                } else if (modulo === 'odontologos') {
+                    return objeto.item.nombre.toLowerCase().includes(textoBusqueda) || objeto.item.especialidad.toLowerCase().includes(textoBusqueda);
+                } else if (modulo === 'consultorios') {
+                    return objeto.item.nombre_medico.toLowerCase().includes(textoBusqueda) || objeto.item.num_consultorio.includes(textoBusqueda);
+                } else if (modulo === 'citas') {
+                    return objeto.item.id_paciente.includes(textoBusqueda) || objeto.item.medico.toLowerCase().includes(textoBusqueda);
+                }
+                return true;
+            });
+
+            if (datosFiltrados.length === 0) {
+                contenedor.innerHTML = `<p class="w3-center w3-text-grey" style="margin-top:20px;">No se encontraron registros.</p>`;
+                return;
+            }
+
+            datosFiltrados.forEach(objeto => {
+                const item = objeto.item;
+                const idx = objeto.originalIndex;
+                let tarjeta = `<div class="tarjeta-registro w3-card-2 w3-animate-right">`;
+                
+                if (modulo === 'pacientes') {
+                    tarjeta += `<b>🆔 ID:</b> ${item.id_paciente}<br>
+                                <b>👤 Nombre:</b> ${item.nombre}<br>
+                                <b>📅 Edad:</b> ${item.edad} años | <b>🩸 Sangre:</b> ${item.tipo_sangre}<br>
+                                <b>📞 Tel:</b> ${item.telefono} | <b>🧬 Sexo:</b> ${item.sexo} | <b>🩻 Seguro:</b> ${item.num_seguro}`;
+                } else if (modulo === 'odontologos') {
+                    tarjeta += `<b>🥼 Doctor ID:</b> ${item.id_doctor}<br>
+                                <b>👤 Nombre:</b> ${item.nombre}<br>
+                                <b>🩺 Especialidad:</b> ${item.especialidad}<br>
+                                <b>📧 Web:</b> ${item.contacto} | <b>🆔 RFC / Lic:</b> ${item.rfc} - ${item.licencia}`;
+                } else if (modulo === 'consultorios') {
+                    tarjeta += `<b>🏢 Consultorio N°:</b> ${item.num_consultorio} (Piso ${item.piso})<br>
+                                <b>👤 Médico:</b> ${item.nombre_medico} (ID: ${item.id_doc})<br>
+                                <b>🩺 Especialidad:</b> ${item.especialidad}`;
+                } else if (modulo === 'citas') {
+                    tarjeta += `<b>📅 Fecha:</b> ${item.fecha} - <b>⏰ Hora:</b> ${item.hora}<br>
+                                <b>👤 Paciente ID:</b> ${item.id_paciente}<br>
+                                <b>🥼 Tratante:</b> ${item.medico} | <b>🏢 Cons:</b> ${item.consultorio}<br>
+                                <b>🦷 Tratamiento:</b> <span class="w3-tag w3-purple w3-round">${item.tratamiento || 'Limpieza'}</span>`;
+                }
+                
+                // Botones de acción integrados
+                tarjeta += `<div class="acciones-tarjeta">
+                                <button class="btn-accion btn-editar" onclick="prepararEdicion('${modulo}', ${idx})"><i class="fa fa-edit"></i> Editar</button>
+                                <button class="btn-accion btn-borrar" onclick="borrarRegistro('${modulo}', ${idx})"><i class="fa fa-trash"></i> Borrar</button>
+                            </div>`;
+                
+                tarjeta += `</div>`;
+                contenedor.innerHTML += tarjeta;
+            });
+        }
+
+        // Cargar datos al formulario para Actualizar
+        function prepararEdicion(modulo, index) {
+            let datos = JSON.parse(localStorage.getItem('db_' + modulo)) || [];
+            let item = datos[index];
+            
+            const formulario = document.getElementById(`form-${modulo}`);
+            document.getElementById(`edit-index-${modulo}`).value = index;
+            document.getElementById(`input-id-${modulo}`).readOnly = true; // Bloquea llave primaria
+
+            for (let llave in item) {
+                if (formulario.elements[llave]) {
+                    formulario.elements[llave].value = item[llave];
+                }
+            }
+
+            let colorModulo = modulo === 'pacientes' ? 'blue' : (modulo === 'odontologos' ? 'teal' : (modulo === 'consultorios' ? 'orange' : 'purple'));
+            document.getElementById(`titulo-form-${modulo}`).innerHTML = `<i class="fa fa-edit"></i> Editando Registro (Fila: ${index + 1})`;
+            document.getElementById(`btn-submit-${modulo}`).innerText = "Guardar Cambios (Actualizar)";
+            document.getElementById(`btn-submit-${modulo}`).className = `w3-button w3-yellow w3-block w3-margin-top w3-round`;
+            document.getElementById(`btn-cancelar-${modulo}`).classList.remove('oculto');
+            
+            formulario.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicion(modulo) {
+            const formulario = document.getElementById(`form-${modulo}`);
+            formulario.reset();
+            document.getElementById(`edit-index-${modulo}`).value = "";
+            document.getElementById(`input-id-${modulo}`).readOnly = false;
+
+            let textoIcono = modulo === 'pacientes' ? 'user' : (modulo === 'odontologos' ? 'user-md' : (modulo === 'consultorios' ? 'building' : 'calendar'));
+            let tituloTexto = modulo === 'pacientes' ? 'Registrar Paciente' : (modulo === 'odontologos' ? 'Registrar Odontólogo' : (modulo === 'consultorios' ? 'Asignar Consultorio' : 'Agendar Cita'));
+            let colorClase = modulo === 'pacientes' ? 'w3-blue' : (modulo === 'odontologos' ? 'w3-teal' : (modulo === 'consultorios' ? 'w3-orange w3-text-white' : 'w3-purple'));
+            
+            document.getElementById(`titulo-form-${modulo}`).innerHTML = `<i class="fa fa-${textoIcono}"></i> ${tituloTexto}`;
+            document.getElementById(`btn-submit-${modulo}`).innerText = tituloTexto;
+            document.getElementById(`btn-submit-${modulo}`).className = `w3-button ${colorClase} w3-block w3-margin-top w3-round`;
+            document.getElementById(`btn-cancelar-${modulo}`).classList.add('oculto');
+        }
+
+        // 4. BORRAR (DELETE)
+        function borrarRegistro(modulo, index) {
+            if (confirm("¿Seguro que deseas eliminar por completo este registro de la base local?")) {
+                let base = JSON.parse(localStorage.getItem('db_' + modulo)) || [];
+                base.splice(index, 1);
+                localStorage.setItem('db_' + modulo, JSON.stringify(base));
+                
+                cancelarEdicion(modulo);
+                actualizarVistaDerecha(modulo);
+                actualizarKPIs();
+                lanzarAlerta("¡Registro eliminado correctamente!");
+            }
+        }
+    </script>
+</body>
+</html>
